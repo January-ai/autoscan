@@ -31,7 +31,6 @@ class BaseLLMProcessor(ABC):
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt
         self.reasoning_effort = None
-        self.allowed_openai_params = None
 
         if self.system_prompt is None:
             raise ValueError("system_prompt and user_prompt must be provided")
@@ -73,7 +72,6 @@ class BaseLLMProcessor(ABC):
             provider = self.model_name.split("/", 1)[0].lower()
             if provider == "openai":
                 self.reasoning_effort = openai_reasoning_effort
-                self.allowed_openai_params = ["reasoning_effort"]
 
     @abstractmethod
     async def acompletion(
@@ -122,11 +120,14 @@ class BaseLLMProcessor(ABC):
         is_strip_code_fences: bool = False,
     ) -> ModelResult:
         try:
+            acompletion_kwargs = {}
+            if self.reasoning_effort is not None:
+                acompletion_kwargs["reasoning_effort"] = self.reasoning_effort
+                acompletion_kwargs["allowed_openai_params"] = ["reasoning_effort"]
             response = await acompletion(
                 model=self.model_name,
                 messages=messages,
-                reasoning_effort=self.reasoning_effort,
-                allowed_openai_params=self.allowed_openai_params)
+                **acompletion_kwargs)
             raw = response.choices[0].message.content
             content = strip_code_fences(raw) if is_strip_code_fences else raw
             usage = response.usage
