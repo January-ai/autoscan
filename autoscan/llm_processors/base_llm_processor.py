@@ -124,10 +124,7 @@ class BaseLLMProcessor(ABC):
             if self.reasoning_effort is not None:
                 acompletion_kwargs["reasoning_effort"] = self.reasoning_effort
                 acompletion_kwargs["allowed_openai_params"] = ["reasoning_effort"]
-            response = await acompletion(
-                model=self.model_name,
-                messages=messages,
-                **acompletion_kwargs)
+            response = await acompletion(model=self.model_name, messages=messages, **acompletion_kwargs)
             raw = response.choices[0].message.content
             content = strip_code_fences(raw) if is_strip_code_fences else raw
             usage = response.usage
