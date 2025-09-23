@@ -28,6 +28,7 @@ async def autoscan(
     polish_output: bool = False,
     first_page: Optional[int] = None,
     last_page: Optional[int] = None,
+    openai_reasoning_effort: Optional[str] = None,
 ) -> AutoScanOutput:
     """
     Convert a PDF to markdown by:
@@ -48,6 +49,7 @@ async def autoscan(
     - `polish_output` (bool, optional): Whether to apply an additional LLM pass to improve formatting, fix broken tables, and enhance document structure. Defaults to False.
     - `first_page` (int, optional): First page to process, defaults to None (process from beginning).
     - `last_page` (int, optional): Last page to process before stopping, defaults to None (process to end).
+    - `openai_reasoning_effort` (str, optional): One of `high`, `medium`, `low` or `minimal` determining reasoning effort for OpenAI model (default is `medium`).
 
     Returns:
         AutoScanOutput: Contains completion time, markdown file path, markdown content, and token usage.
@@ -88,6 +90,7 @@ async def autoscan(
         # Initialize the LLM
         llm_processor: BaseLLMProcessor = ImageToMarkdownProcessor(
             model_name=model_name,
+            openai_reasoning_effort=openai_reasoning_effort,
             system_prompt=IMG_TO_MARKDOWN_PROMPT,
             user_prompt=user_instructions or "",
             pass_previous_page_context=(accuracy == "high"),
@@ -125,6 +128,7 @@ async def autoscan(
             try:
                 markdown_consolidator = MarkdownConsolidator(
                     model_name=model_name,
+                    openai_reasoning_effort=openai_reasoning_effort,
                     system_prompt=POST_PROCESSING_PROMPT,
                     user_prompt=user_instructions or "",
                 )

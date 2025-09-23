@@ -18,6 +18,7 @@ async def _process_file(
     polish_output: bool = False,
     first_page: int | None = None,
     last_page: int | None = None,
+    openai_reasoning_effort: str | None = None,
 ) -> None:
     await autoscan(
         pdf_path=pdf_path,
@@ -30,6 +31,7 @@ async def _process_file(
         polish_output=polish_output,
         first_page=first_page,
         last_page=last_page,
+        openai_reasoning_effort=openai_reasoning_effort,
     )
 
 async def _run(
@@ -43,9 +45,10 @@ async def _run(
     polish_output: bool = False,
     first_page: int | None = None,
     last_page: int | None = None,
+    openai_reasoning_effort: str | None = None,
 ) -> None:
     if pdf_path:
-        await _process_file(pdf_path, model, accuracy, prompt, output_dir, save_llm_calls, temp_dir, polish_output, first_page, last_page)
+        await _process_file(pdf_path, model, accuracy, prompt, output_dir, save_llm_calls, temp_dir, polish_output, first_page, last_page, openai_reasoning_effort)
     else:
         logging.error("No valid input provided. Use --help for usage information.")
         sys.exit(1)
@@ -111,6 +114,12 @@ def main() -> None:
         type=int,
         help="Last page to process before stopping (defaults to processing to the end)",
     )
+    parser.add_argument(
+        "--openai-reasoning-effort",
+        type=str,
+        choices=["high", "medium", "low", "minimal"],
+        help="Reasoning effort for OpenAI model (default is medium)",
+    )
 
     args = parser.parse_args()
 
@@ -147,6 +156,7 @@ def main() -> None:
             polish_output=args.polish_output,
             first_page=args.first_page,
             last_page=args.last_page,
+            openai_reasoning_effort=args.openai_reasoning_effort,
         )
     )
 
